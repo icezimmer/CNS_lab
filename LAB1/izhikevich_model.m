@@ -34,7 +34,7 @@ for i = 1: N
     ww(end+1) = w;
 end
 
-figure('Name',name,'NumberTitle','off');
+gcf = figure('Name',name,'NumberTitle','off');
 
 tiledlayout(2,2)
 
@@ -51,8 +51,9 @@ xlabel("membrane potential")
 ylabel("recovery")
 
 nexttile
-plot(I, '-k')
+plot(I, '-g')
+title("Input")
 
-
+saveas(gcf, fullfile('results', strcat(name, '.png')))
 
 end
