@@ -1,20 +1,61 @@
 field1 = 'Neuro_computational_feature';
 value1 = ["Tonic Spiking";"Phasic Spiking";"Tonic Bursting";"Phasic Bursting";"Mixed Mode";"Spike Frequency Adaptation";"Class 1";"Class 2";"Spike Latency";"Subthreshold Oscillations";"Resonator";"Integrator";"Rebound Spike";"Rebound Burst";"Threshold Variability";"Bistability";"Depolarizing Afterpotential";"Accomodation";"Inhibition-induced Spiking";"Inhibition-induced Bursting"];
 
-field2 = 'Parameters';
-value2 = [0.02 0.2 -65 6;0.02 0.25 -65 6;0.02 0.2 -50 2;0.02 0.25 -55 0.05;0.02 0.2 -55 4;0.01 0.2 -65 8;0.02 -0.1 -55 6;0.02 0.26 -65 0;0.02 0.2 -65 6;0.05 0.26 -60 0;0.1 0.26 -60 -1;0.02 -0.1 -55 6;0.03 0.25 -60 4;0.03 0.25 -52 0;0.04 0.25 -60 4;0.1 0.26 -60 0;1 0.2 -60 -21;0.02 1 -55 4;-0.02 -1 -60 8;-0.026 -1 -45 -2];
+field2 = 'Initial_conditions';
+value2 = [-70 -14;
+    -64 -16;
+    -70 -14;
+    -64 -16;
+    -70 -14;
+    -70 -14;
+    -60 6;
+    -64 -16.64;
+    -70 -14;
+    -62 -16.12;
+    -62 -16.12;
+    -60 6;
+    -64 -16;
+    -64 -16;
+    -64 -16;
+    -61 -15.86;
+    -70 -14;
+    -65 -16;
+    -63.8 63.8;
+    -63.8 63.8];
 
-%field3 = 'Input_signal';
-%value3 = [zeros(1,10) 14*ones(1,90);zeros(1,20) 0.5*ones(1,180);zeros(1,22) 15*ones(1,198);zeros(1,20) 0.6*ones(1,180);zeros(1,16) 10*ones(1,144);zeros(1,8) 30*ones(1,77);zeros(1,30) 0.075*0:0.25:270;-0.5*ones(1,30) -0.5*ones(1,270*0.25)+0.015*0:0.25:270;zeros(1,10) 7.04*ones(1,2) zeros(1:88);zeros(1,20) 2*ones(1,4) zeros(1:176);];
+field3 = 'Parameters';
+value3 = [0.02 0.2 -65 6;
+    0.02 0.25 -65 6;
+    0.02 0.2 -50 2;
+    0.02 0.25 -55 0.05;
+    0.02 0.2 -55 4;
+    0.01 0.2 -65 8;
+    0.02 -0.1 -55 6;
+    0.2 0.26 -65 0;
+    0.02 0.2 -65 6;
+    0.05 0.26 -60 0;
+    0.1 0.26 -60 -1;
+    0.02 -0.1 -55 6;
+    0.03 0.25 -60 4;
+    0.03 0.25 -52 0;
+    0.03 0.25 -60 4;
+    0.1 0.26 -60 0;
+    1 0.2 -60 -21;
+    0.02 1 -55 4;
+    -0.02 -1 -60 8;
+    -0.026 -1 -45 -2];
 
-field3 = 'Tau';
-value3 = [0.25; 0.25; 0.25; 0.2; 0.25; 0.25; 0.25; 0.25; 0.2; 0.25; 0.25; 0.25; 0.2; 0.2; 0.25; 0.25; 0.1; 0.5; 0.5; 0.5];
+field4 = 'Tau';
+value4 = [0.25; 0.25; 0.25; 0.2; 0.25; 0.25; 0.25; 0.25; 0.2; 0.25; 0.25; 0.25; 0.2; 0.2; 0.25; 0.25; 0.1; 0.5; 0.5; 0.5];
+
+data_values = struct(field1, value1, field2, value2, field3, value3, field4, value4);
 
 
 input_signal = {};
 
+%%%%%%%%%%%%%%% (A) tonic spiking %%%%%%%%%%%%%%%%%%%%%%
 I = [];
-tau = value3(1); tspan = 0:tau:100;
+tau = data_values.Tau(1); tspan = 0:tau:100;
 T1=tspan(end)/10;
 for t=tspan
     if (t>T1) 
@@ -23,10 +64,11 @@ for t=tspan
         I(end+1)=0;
     end
 end
-input_signal{1} = I;
+input_signal{end+1} = I;
 
+%%%%%%%%%%%%%%%%%% (B) phasic spiking %%%%%%%%%%%%%%%%%%%%%%%%%
 I = [];
-tau = value3(2); tspan = 0:tau:100;
+tau = data_values.Tau(2); tspan = 0:tau:200;
 T1=20;
 for t=tspan
     if (t>T1) 
@@ -35,11 +77,11 @@ for t=tspan
         I(end+1)=0;
     end
 end
-input_signal{2} = I;
+input_signal{end+1} = I;
 
-
+%%%%%%%%%%%%%% (C) tonic bursting %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 I = [];
-tau = value3(3); tspan = 0:tau:100;
+tau = data_values.Tau(3); tspan = 0:tau:220;
 T1=22;
 for t=tspan
     if (t>T1) 
@@ -48,10 +90,11 @@ for t=tspan
         I(end+1)=0;
     end
 end
-input_signal{3} = I;
+input_signal{end+1} = I;
 
+%%%%%%%%%%%%%%% (D) phasic bursting %%%%%%%%%%%%%%%%%%%%%%%%%%
 I = [];
-tau = value3(4); tspan = 0:tau:100;
+tau = data_values.Tau(4); tspan = 0:tau:200;
 T1=20;
 for t=tspan
     if (t>T1) 
@@ -60,10 +103,11 @@ for t=tspan
         I(end+1)=0;
     end
 end
-input_signal{4} = I;
+input_signal{end+1} = I;
 
+%%%%%%%%%%%%%%% (E) mixed mode %%%%%%%%%%%%%%%%%%%%%%%%%
 I = [];
-tau = value3(5); tspan = 0:tau:100;
+tau = data_values.Tau(5); tspan = 0:tau:160;
 T1=tspan(end)/10;
 for t=tspan
     if (t>T1) 
@@ -72,10 +116,11 @@ for t=tspan
         I(end+1)=0;
     end
 end
-input_signal{5} = I;
+input_signal{end+1} = I;
 
+%%%%%%%%%%%%%%%% (F) spike freq. adapt %%%%%%%%%%%%%%%%%%%%%%%%
 I = [];
-tau = value3(6); tspan = 0:tau:100;
+tau = data_values.Tau(6); tspan = 0:tau:85;
 T1=tspan(end)/10;
 for t=tspan
     if (t>T1) 
@@ -84,10 +129,11 @@ for t=tspan
         I(end+1)=0;
     end
 end
-input_signal{6} = I;
+input_signal{end+1} = I;
 
+%%%%%%%%%%%%%%%%% (G) Class 1 exc. %%%%%%%%%%%%%%%%%%%%%%%%%%
 I = [];
-tau = value3(7); tspan = 0:tau:100;
+tau = data_values.Tau(7); tspan = 0:tau:300;
 T1=30;
 for t=tspan
     if (t>T1) 
@@ -96,10 +142,11 @@ for t=tspan
         I(end+1)=0;
     end
 end
-input_signal{7} = I;
+input_signal{end+1} = I;
 
+%%%%%%%%%%%%%%%%%% (H) Class 2 exc. %%%%%%%%%%%%%%%%%%%%%%%%%%
 I = [];
-tau = value3(8); tspan = 0:tau:100;
+tau = data_values.Tau(8); tspan = 0:tau:300;
 T1=30;
 for t=tspan
     if (t>T1) 
@@ -108,10 +155,11 @@ for t=tspan
         I(end+1)=-0.5;
     end
 end
-input_signal{8} = I;
+input_signal{end+1} = I;
 
+%%%%%%%%%%%%%%%%% (I) spike latency %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 I = [];
-tau = value3(9); tspan = 0:tau:100;
+tau = data_values.Tau(9); tspan = 0:tau:100;
 T1=tspan(end)/10;
 for t=tspan
     if t>T1 && t < T1+3 
@@ -120,22 +168,24 @@ for t=tspan
         I(end+1)=0;
     end
 end
-input_signal{9} = I;
+input_signal{end+1} = I;
 
+%%%%%%%%%%%%%%%%% (J) subthresh. osc. %%%%%%%%%%%%%%%%%%%%%%%%%%%
 I = [];
-tau = value3(10); tspan = 0:tau:100;
+tau = data_values.Tau(10); tspan = 0:tau:200;
 T1=tspan(end)/10;
 for t=tspan
-    if (t>T1) & (t < T1+5) 
+    if (t>T1) && (t < T1+5) 
         I(end+1)=2;
     else
         I(end+1)=0;
     end
 end
-input_signal{10} = I;
+input_signal{end+1} = I;
 
+%%%%%%%%%%%%%%%%%% (K) resonator %%%%%%%%%%%%%%%%%%%%%%%%
 I = [];
-tau = value3(11); tspan = 0:tau:100;
+tau = data_values.Tau(11); tspan = 0:tau:400;
 T1=tspan(end)/10;
 T2=T1+20;
 T3 = 0.7*tspan(end);
@@ -147,10 +197,11 @@ for t=tspan
         I(end+1)=0;
     end
 end
-input_signal{11} = I;
+input_signal{end+1} = I;
 
+%%%%%%%%%%%%%%%% (L) integrator %%%%%%%%%%%%%%%%%%%%%%%%
 I = [];
-tau = value3(12); tspan = 0:tau:100;
+tau = data_values.Tau(12); tspan = 0:tau:100;
 T1=tspan(end)/11;
 T2=T1+5;
 T3 = 0.7*tspan(end);
@@ -162,10 +213,11 @@ for t=tspan
         I(end+1)=0;
     end
 end
-input_signal{12} = I;
+input_signal{end+1} = I;
 
+%%%%%%%%%%%%%%%%% (M) rebound spike %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 I = [];
-tau = value3(13); tspan = 0:tau:100;
+tau = data_values.Tau(13); tspan = 0:tau:200;
 T1=20;
 for t=tspan
     if (t>T1) && (t < T1+5) 
@@ -174,10 +226,11 @@ for t=tspan
         I(end+1)=0;
     end
 end
-input_signal{13} = I;
+input_signal{end+1} = I;
 
+%%%%%%%%%%%%%%%%% (N) rebound burst %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 I = [];
-tau = value3(14); tspan = 0:tau:100;
+tau = data_values.Tau(14); tspan = 0:tau:200;
 T1=20;
 for t=tspan
     if (t>T1) && (t < T1+5) 
@@ -186,10 +239,11 @@ for t=tspan
         I(end+1)=0;
     end
 end
-input_signal{14} = I;
+input_signal{end+1} = I;
 
+%%%%%%%%%%%%%%%%% (O) thresh. variability %%%%%%%%%%%%%%%%%%%%%%%%%%
 I = [];
-tau = value3(15); tspan = 0:tau:100;
+tau = data_values.Tau(15); tspan = 0:tau:100;
 for t=tspan
    if ((t>10) && (t < 15)) || ((t>80) && (t < 85)) 
         I(end+1)=1;
@@ -199,10 +253,11 @@ for t=tspan
         I(end+1)=0;
     end
 end
-input_signal{15} = I;
+input_signal{end+1} = I;
 
+%%%%%%%%%%%%%% (P) bistability %%%%%%%%%%%%%%%%%%%%%%%%%%
 I = [];
-tau = value3(16); tspan = 0:tau:100;
+tau = data_values.Tau(16); tspan = 0:tau:300;
 T1=tspan(end)/8;
 T2 = 216;
 for t=tspan
@@ -212,22 +267,24 @@ for t=tspan
         I(end+1)=0.24;
     end
 end
-input_signal{16} = I;
+input_signal{end+1} = I;
 
+%%%%%%%%%%%%%% (Q) DAP %%%%%%%%%%%%%%%%%%%%%%%%%%
 I = [];
-tau = value3(17); tspan = 0:tau:100;
+tau = data_values.Tau(17); tspan = 0:tau:50;
 T1=10;
 for t=tspan
      if abs(t-T1)<1 
-        I(end+1)=20;
+         I(end+1)=20;
     else
         I(end+1)=0;
     end
 end
-input_signal{17} = I;
+input_signal{end+1} = I;
 
+%%%%%%%%%%%%%% (R) accomodation %%%%%%%%%%%%%%%%%%%%%%%%%%
 I = [];
-tau = value3(18); tspan = 0:tau:100;
+tau = data_values.Tau(18); tspan = 0:tau:400;
 for t=tspan
     if (t < 200)
         I(end+1)=t/25;
@@ -239,10 +296,11 @@ for t=tspan
         I(end+1)=0;
     end
 end
-input_signal{18} = I;
+input_signal{end+1} = I;
 
+%%%%%%%%%%%%%% (S) inhibition induced spiking %%%%%%%%%%%%%%%%%%%%%%%%%%
 I = [];
-tau = value3(19); tspan = 0:tau:100;
+tau = data_values.Tau(19); tspan = 0:tau:350;
 for t=tspan
     if (t < 50) || (t>250)
         I(end+1)=80;
@@ -250,10 +308,11 @@ for t=tspan
         I(end+1)=75;
     end
 end
-input_signal{19} = I;
+input_signal{end+1} = I;
 
+%%%%%%%%%%%%%% (T) inhibition induced bursting %%%%%%%%%%%%%%%%%%%%%%%%%%
 I = [];
-tau = value3(20); tspan = 0:tau:100;
+tau = data_values.Tau(20); tspan = 0:tau:350;
 for t=tspan
     if (t < 50) || (t>250)
         I(end+1)=80;
@@ -261,9 +320,8 @@ for t=tspan
         I(end+1)=75;
     end
 end
-input_signal{20} = I;
+input_signal{end+1} = I;
 
-data_values = struct(field1, value1, field2, value2, field3, value3);
 
 save(fullfile('data', 'data_values.mat'), '-struct', 'data_values')
 save(fullfile('data', 'input_values.mat'), 'input_signal')

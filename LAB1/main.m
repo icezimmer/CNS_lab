@@ -1,13 +1,15 @@
-data_values = load(fullfile('data', 'data_value.mat'));
-input_values = load(fullfile('data', 'input_signal.mat'), 'input_signal');
-input_signal = input_values.input_signal;
+create_data
 
-u0 = -65;
+data_values = load(fullfile('data', 'data_values.mat'));
+input_values = load(fullfile('data', 'input_values.mat'), 'input_signal');
+input_signal = input_values.input_signal;
 
 for i = 1:20
     name = data_values.Neuro_computational_feature(i);
-    tau = data_values.Tau(i);
+    u0 = data_values.Initial_conditions(i,1);
+    w0 = data_values.Initial_conditions(i,2);
     parameters = data_values.Parameters(i,:);
+    tau = data_values.Tau(i);
     input = cell2mat(input_signal(i));
-    izhikevich_model(name, u0, tau, parameters, input);
+    izhikevich_model(name, u0, w0, parameters, tau, input);
 end

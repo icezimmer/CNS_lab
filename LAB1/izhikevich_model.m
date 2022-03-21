@@ -1,4 +1,7 @@
-function [uu, ww] = izhikevich_model(name, u0, tau, parameters, I)
+function [uu, ww] = izhikevich_model(name, u0, w0, parameters, tau, I)
+
+f = @(u, w, I) 0.04 * u^2 + 5 * u + 140 - w + I;
+g = @(u, w, a, b) a * (b * u - w);
 
 display(name)
 
@@ -7,20 +10,14 @@ b=parameters(2);
 c=parameters(3);
 d=parameters(4);
 
-w0 = b * u0;
-
-N = length(I);
-
 u = u0;
 w = w0;
 
 uu = [];
 ww = [];
 
-f = @(u, w, I) 0.04 * u^2 + 5 * u + 140 - w + I;
-g = @(u, w, a, b) a * (b * u - w);
 
-for i = 1: N
+for i = 1 : length(I)
     u = u + tau * f(u, w, I(i));
     w = w + tau * g(u, w, a, b);
 
@@ -40,7 +37,7 @@ tiledlayout(2,2)
 
 nexttile
 plot(uu, '-b')
-title("Spiking neuron")
+title("Neuron")
 xlabel('time')
 ylabel('membrane potential')
 
