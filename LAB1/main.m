@@ -11,5 +11,6 @@ for i = 1:20
     parameters = data_values.Parameters(i,:);
     tau = data_values.Tau(i);
     input = cell2mat(input_signal(i));
-    izhikevich_model(name, u0, w0, parameters, tau, input);
+    Neuron = Izhikevich(u0, w0, parameters, tau, input, name);
+    Neuron.plot(name)
 end
