@@ -14,8 +14,7 @@ classdef Izhikevich
             %   Detailed explanation goes here
             if(strcmp(name,"Class 1") || strcmp(name,"Integrator"))
                 f = @(u, w, I) 0.04 * u^2 + 4.1 * u + 108 - w + I;
-                g = @(u, w, a, b) a * (b * u + 65);
-                display(name)
+                g = @(u, w, a, b) a * (b * u - w);
             elseif(strcmp(name,"Accomodation"))
                 f = @(u, w, I) 0.04 * u^2 + 5 * u + 140 - w + I;
                 g = @(u, w, a, b) a * (b * u + 65);

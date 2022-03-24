@@ -1,5 +1,9 @@
 field1 = 'Neuro_computational_feature';
-value1 = ["Tonic Spiking";"Phasic Spiking";"Tonic Bursting";"Phasic Bursting";"Mixed Mode";"Spike Frequency Adaptation";"Class 1";"Class 2";"Spike Latency";"Subthreshold Oscillations";"Resonator";"Integrator";"Rebound Spike";"Rebound Burst";"Threshold Variability";"Bistability";"Depolarizing Afterpotential";"Accomodation";"Inhibition-induced Spiking";"Inhibition-induced Bursting"];
+value1 = ["Tonic Spiking";"Phasic Spiking";"Tonic Bursting";"Phasic Bursting";
+    "Mixed Mode";"Spike Frequency Adaptation";"Class 1";"Class 2";
+    "Spike Latency";"Subthreshold Oscillations";"Resonator";"Integrator";
+    "Rebound Spike";"Rebound Burst";"Threshold Variability";"Bistability";
+    "Depolarizing Afterpotential";"Accomodation";"Inhibition-induced Spiking";"Inhibition-induced Bursting"];
 
 field2 = 'Initial_conditions';
 value2 = [-70 -14;
@@ -51,7 +55,7 @@ value4 = [0.25; 0.25; 0.25; 0.2; 0.25; 0.25; 0.25; 0.25; 0.2; 0.25; 0.25; 0.25; 
 data_values = struct(field1, value1, field2, value2, field3, value3, field4, value4);
 
 
-input_signal = {};
+input_signals = {};
 
 %%%%%%%%%%%%%%% (A) tonic spiking %%%%%%%%%%%%%%%%%%%%%%
 I = [];
@@ -64,7 +68,7 @@ for t=tspan
         I(end+1)=0;
     end
 end
-input_signal{end+1} = I;
+input_signals{end+1} = I;
 
 %%%%%%%%%%%%%%%%%% (B) phasic spiking %%%%%%%%%%%%%%%%%%%%%%%%%
 I = [];
@@ -77,7 +81,7 @@ for t=tspan
         I(end+1)=0;
     end
 end
-input_signal{end+1} = I;
+input_signals{end+1} = I;
 
 %%%%%%%%%%%%%% (C) tonic bursting %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 I = [];
@@ -90,7 +94,7 @@ for t=tspan
         I(end+1)=0;
     end
 end
-input_signal{end+1} = I;
+input_signals{end+1} = I;
 
 %%%%%%%%%%%%%%% (D) phasic bursting %%%%%%%%%%%%%%%%%%%%%%%%%%
 I = [];
@@ -103,7 +107,7 @@ for t=tspan
         I(end+1)=0;
     end
 end
-input_signal{end+1} = I;
+input_signals{end+1} = I;
 
 %%%%%%%%%%%%%%% (E) mixed mode %%%%%%%%%%%%%%%%%%%%%%%%%
 I = [];
@@ -116,7 +120,7 @@ for t=tspan
         I(end+1)=0;
     end
 end
-input_signal{end+1} = I;
+input_signals{end+1} = I;
 
 %%%%%%%%%%%%%%%% (F) spike freq. adapt %%%%%%%%%%%%%%%%%%%%%%%%
 I = [];
@@ -129,7 +133,7 @@ for t=tspan
         I(end+1)=0;
     end
 end
-input_signal{end+1} = I;
+input_signals{end+1} = I;
 
 %%%%%%%%%%%%%%%%% (G) Class 1 exc. %%%%%%%%%%%%%%%%%%%%%%%%%%
 I = [];
@@ -142,7 +146,7 @@ for t=tspan
         I(end+1)=0;
     end
 end
-input_signal{end+1} = I;
+input_signals{end+1} = I;
 
 %%%%%%%%%%%%%%%%%% (H) Class 2 exc. %%%%%%%%%%%%%%%%%%%%%%%%%%
 I = [];
@@ -155,7 +159,7 @@ for t=tspan
         I(end+1)=-0.5;
     end
 end
-input_signal{end+1} = I;
+input_signals{end+1} = I;
 
 %%%%%%%%%%%%%%%%% (I) spike latency %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 I = [];
@@ -168,7 +172,7 @@ for t=tspan
         I(end+1)=0;
     end
 end
-input_signal{end+1} = I;
+input_signals{end+1} = I;
 
 %%%%%%%%%%%%%%%%% (J) subthresh. osc. %%%%%%%%%%%%%%%%%%%%%%%%%%%
 I = [];
@@ -181,7 +185,7 @@ for t=tspan
         I(end+1)=0;
     end
 end
-input_signal{end+1} = I;
+input_signals{end+1} = I;
 
 %%%%%%%%%%%%%%%%%% (K) resonator %%%%%%%%%%%%%%%%%%%%%%%%
 I = [];
@@ -197,7 +201,7 @@ for t=tspan
         I(end+1)=0;
     end
 end
-input_signal{end+1} = I;
+input_signals{end+1} = I;
 
 %%%%%%%%%%%%%%%% (L) integrator %%%%%%%%%%%%%%%%%%%%%%%%
 I = [];
@@ -213,7 +217,7 @@ for t=tspan
         I(end+1)=0;
     end
 end
-input_signal{end+1} = I;
+input_signals{end+1} = I;
 
 %%%%%%%%%%%%%%%%% (M) rebound spike %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 I = [];
@@ -226,7 +230,7 @@ for t=tspan
         I(end+1)=0;
     end
 end
-input_signal{end+1} = I;
+input_signals{end+1} = I;
 
 %%%%%%%%%%%%%%%%% (N) rebound burst %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 I = [];
@@ -239,7 +243,7 @@ for t=tspan
         I(end+1)=0;
     end
 end
-input_signal{end+1} = I;
+input_signals{end+1} = I;
 
 %%%%%%%%%%%%%%%%% (O) thresh. variability %%%%%%%%%%%%%%%%%%%%%%%%%%
 I = [];
@@ -253,7 +257,7 @@ for t=tspan
         I(end+1)=0;
     end
 end
-input_signal{end+1} = I;
+input_signals{end+1} = I;
 
 %%%%%%%%%%%%%% (P) bistability %%%%%%%%%%%%%%%%%%%%%%%%%%
 I = [];
@@ -267,7 +271,7 @@ for t=tspan
         I(end+1)=0.24;
     end
 end
-input_signal{end+1} = I;
+input_signals{end+1} = I;
 
 %%%%%%%%%%%%%% (Q) DAP %%%%%%%%%%%%%%%%%%%%%%%%%%
 I = [];
@@ -280,7 +284,7 @@ for t=tspan
         I(end+1)=0;
     end
 end
-input_signal{end+1} = I;
+input_signals{end+1} = I;
 
 %%%%%%%%%%%%%% (R) accomodation %%%%%%%%%%%%%%%%%%%%%%%%%%
 I = [];
@@ -296,7 +300,7 @@ for t=tspan
         I(end+1)=0;
     end
 end
-input_signal{end+1} = I;
+input_signals{end+1} = I;
 
 %%%%%%%%%%%%%% (S) inhibition induced spiking %%%%%%%%%%%%%%%%%%%%%%%%%%
 I = [];
@@ -308,7 +312,7 @@ for t=tspan
         I(end+1)=75;
     end
 end
-input_signal{end+1} = I;
+input_signals{end+1} = I;
 
 %%%%%%%%%%%%%% (T) inhibition induced bursting %%%%%%%%%%%%%%%%%%%%%%%%%%
 I = [];
@@ -320,8 +324,8 @@ for t=tspan
         I(end+1)=75;
     end
 end
-input_signal{end+1} = I;
+input_signals{end+1} = I;
 
 
 save(fullfile('data', 'data_values.mat'), '-struct', 'data_values')
-save(fullfile('data', 'input_values.mat'), 'input_signal')
+save(fullfile('data', 'input_values.mat'), 'input_signals')
