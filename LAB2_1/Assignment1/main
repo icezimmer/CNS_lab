@@ -1,0 +1,2 @@
+input_data = load('lab2_1_data.csv');
+size(input_data)

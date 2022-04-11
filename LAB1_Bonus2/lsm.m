@@ -1,4 +1,4 @@
-function [states,firings] = lsm(input, Ne, Ni, win_e, win_i, w_e, w_i)
+function [states,firings] = lsm(input, Ne, Ni, win_e, win_i, w_e, w_i, bias, fun)
 % Created by Eugene M. Izhikevich, February 25, 2003
 % slightly modified by Claudio Gallicchio, 2021
 
@@ -9,16 +9,16 @@ b=[0.2*ones(Ne,1);      0.25-0.05*ri];
 c=[-65+15*re.^2;        -65*ones(Ni,1)];
 d=[8-6*re.^2;           2*ones(Ni,1)];
 
-% scaling of input connections
+% Scaling of input connections
 U=[win_e * ones(Ne,1);   win_i * ones(Ni,1)];
-% the following matrix contains the recurrent (random) weights
+% The following matrix contains the recurrent (random) weights
 S=[w_e*rand(Ne+Ni,Ne),  -w_i*rand(Ne+Ni,Ni)];
 
 v=-65*ones(Ne+Ni,1);    % Initial values of v
 u=b.*v;                 % Initial values of u
-firings=[];             % spike timings
+firings=[];             % Spike timings
 
-states = []; % here we construct the matrix of reservoir states
+states = []; % Here we construct the matrix of reservoir states
 
 for t=1:size(input,2)            % simulation of 1000 ms
   % we don't need random thalamic input:
@@ -35,7 +35,8 @@ for t=1:size(input,2)            % simulation of 1000 ms
   v=v+0.5*(0.04*v.^2+5*v+140-u+I); % for numerical
   u=u+a.*(b.*v-u);                 % stability
   
-  states = [states (v>=30)];  % neuron is active or not
-  
+  states = [states fun(bias, v)];
+  %states = [states (v>=30)];  % neuron is active or not
 end
-%plot(firings(:,1),firings(:,2),'.');
+% For each time t plot the active neurons
+% plot(firings(:,1),firings(:,2),'.');

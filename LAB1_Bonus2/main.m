@@ -27,21 +27,31 @@ tr_target = target(tr_index);
 vl_target = target(vl_index);
 ts_target = target(ts_index);
 
+% Activation functions
+Identity = @(x, bias) x+bias; 
+Binary = @(x, bias) x>0;
+TanH = @(x, bias) tanh(x+bias);
+ReLu = @(x, bias) (x+bias>0).*x;
+act_funs = {Identity, Binary, TanH, ReLu};
+
+
 % Number of configuration for the Random Search
-num_config=3;
+num_config = 10;
 
 % Random Search
 for config = 1:num_config
     % Hyperparameters generation
-    Ne = randi([200, 300]);
-    Ni = randi([100, 200]);
-    win_e = 6 + (1+1) * rand - 1;
-    win_i = 5 + (1+1) * rand - 1;
-    w_e = -1 + (1+1) * rand - 1;
-    w_i = -6 + (1+1) * rand - 1;
+    cx = -30; rx = 10; bias = cx + (rx+rx) * rand - rx;
+    act_fun = act_funs{randi([1, length(act_funs)])};
+    sx = 200; dx = 300; Ne = randi([sx, dx]);
+    sx = 100; dx = 200; Ni = randi([sx, dx]);
+    cx = 1; rx = 10; win_e = cx + (rx+rx) * rand - rx;
+    cx = 8; rx = 10; win_i = cx + (rx+rx) * rand - rx;
+    cx = 16; rx = 10; w_e = cx + (rx+rx) * rand - rx;
+    cx = -23; rx = 10; w_i = cx + (rx+rx) * rand - rx;
 
     % States computation (LSM phase)
-    [states, ~] = lsm(all_input, Ne, Ni, win_e, win_i, w_e, w_i);
+    [states, ~] = lsm(all_input, Ne, Ni, win_e, win_i, w_e, w_i, bias, act_fun);
 
     % Training Phase
     tr_states = states(:,tr_index);
@@ -59,6 +69,7 @@ for config = 1:num_config
         tr_minimum = tr_error;
         vl_minimum = vl_error;
         states_best = states;
+        bias_best = bias;
         Ne_best = Ne;
         Ni_best = Ni;        
         win_e_best = win_e;
@@ -69,6 +80,7 @@ for config = 1:num_config
         tr_minimum = tr_error;
         vl_minimum = vl_error;
         states_best = states;
+        bias_best = bias;
         Ne_best = Ne;
         Ni_best = Ni;
         win_e_best = win_e;
@@ -79,6 +91,7 @@ for config = 1:num_config
 end
 
 disp('Best Hyperparameters: ')
+disp(['Best bias: ', num2str(bias_best)])
 disp(['Best Ne: ', num2str(Ne_best)])
 disp(['Best Ni: ', num2str(Ni_best)])
 disp(['Best win_e: ', num2str(win_e_best)])
@@ -102,18 +115,15 @@ ts_output = W_out * ts_states_best;
 ts_error = mean(abs(ts_output - ts_target));
 display(['TS MAE (best config): ', num2str(ts_error)])
 
-gcf1 = figure('Name','Predicted signal');
+gcf = figure('Name','Predicted signal');
 
 tiledlayout(3,1)
 
 liquid = nexttile;
-spy(ts_states_best, '.b')
+imshow(ts_states_best, []);
+colormap(liquid, "turbo")
+colorbar(liquid)
 title("Liquid state")
-%map = [1 1 1;
-%    0 0 1];
-%imshow(ts_states_best);
-%colormap(map);
-%title("Liquid state")
 ylabel('neuron')
 xlabel('time')
 
@@ -128,3 +138,5 @@ title("Target signal")
 xlabel("time")
 
 linkaxes([liquid, read_out, target],'x')
+
+saveas(gcf, fullfile('results', 'test.png'))
