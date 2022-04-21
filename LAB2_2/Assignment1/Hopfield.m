@@ -55,7 +55,7 @@ classdef Hopfield
             title("Energy function")
             
             figure('Name','Overlapping functions');
-            plt2 = plot(obj.measures);
+            plt2 = plot(obj.measures');
             title("Overlapping functions")
             legend(plt2,'m_0', 'm_1', 'm_2','Location', 'best')
             

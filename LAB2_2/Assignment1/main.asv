@@ -20,4 +20,3 @@ for config=1:num_config
 end
 
 Model_best = Hopfield(input_patterns, memory_pattern+1, bias_best, distortion_prop);
-Model_best.plot
