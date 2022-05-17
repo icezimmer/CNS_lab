@@ -9,7 +9,7 @@ for epoch = 1 : max_epoch
         U = input_data_shuffle(:, pattern);
         v = W(:, end)' * U;
         delta_w = v * U - ((v * ( ones(1, size(U,1)) * U ) * ones(1, size(U,2))) / size(U, 2));
-        W = [W, W(:, end) + learning_rate * delta_w];
+        W = cat(2, W, W(:, end) + learning_rate * delta_w);
     end
     if norm(W(:, end) - W(:, end-1)) < eps
         epoch = max_epoch;

@@ -5,7 +5,7 @@ classdef Hopfield
         measures
         energy
         streaming
-        discrepancy
+        similarity
     end
 
     methods
@@ -42,7 +42,7 @@ classdef Hopfield
                 end
             end
 
-            obj.discrepancy = nnz(obj.neurons(:, end) ~= input_patterns(:, pattern)) / numel(input_patterns(:, pattern));
+            obj.similarity = 1/2 * sum(abs(obj.neurons(:, end) - input_patterns(:, pattern)));
         end
 
         function video(obj)
@@ -67,12 +67,12 @@ classdef Hopfield
             img1 = reshape(obj.neurons(:, 1), 32, 32);
             img2 = reshape(obj.neurons(:, end), 32, 32);
             gcf3 = figure('Name', 'Reconstructed image');
-            t = tiledlayout(1,2);
+            tiledlayout(1,2)
             nexttile
             imagesc(img1)
             nexttile
             imagesc(img2)
-            title(t, ['Discrepancy is ', num2str(obj.discrepancy)])
+            title(gcf3,'Name', num2str(obj.similarity))
             saveas(gcf3, fullfile('results', strcat('reconstruction_', subt1, '_', subt2,  '.png')))
         end
     end

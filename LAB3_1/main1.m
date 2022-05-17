@@ -20,12 +20,11 @@ ts_tg = target_data(ts_index);
 
 % Model Selection (Training with Random search)
 num_config = 40;
-pool = parpool
 for config = 1:num_config
     [net, delayedInput, initialInput, ~, delayedTarget] = randomIDNNgen(tr_in, tr_tg, [5, 15], [10, 20], [0.001, 0.001], [0.5, 0.5], [500,1500], [0.1, 0.1]);
-    net = train(net, delayedInput, delayedTarget, initialInput,'useParallel','yes');
-    tr_out = net(tr_in,'useParallel','yes');
-    vl_out = net(vl_in,'useParallel','yes');
+    net = train(net, delayedInput, delayedTarget, initialInput);
+    tr_out = net(tr_in);
+    vl_out = net(vl_in);
     tr_error = immse(cell2mat(tr_out), cell2mat(tr_tg));
     vl_error = immse(cell2mat(vl_out), cell2mat(vl_tg));
     % Best configuration

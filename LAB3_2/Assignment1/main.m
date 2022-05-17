@@ -38,7 +38,7 @@ immse(y, d)
 
 seed = 1;
 % Model Selection (Training with Random search)
-num_config = 100;
+num_config = 10;
 for config = 1:num_config
 
     [omega_in, Nh, rho, Nw, lambda_r] = randomGen([1], [100, 500], [0.9], [200, 700], [0], seed);
@@ -90,7 +90,7 @@ x_ts = esn(ts_in, omega_in_best, Nh_best, rho_best, 0, seed_best);
 y_ts = readout(x_ts, W_out_new);
 ts_error = immse(y_ts, ts_tg);
 
-disp(['TS MSE (best config after refit): ', num2str(ts_error)]);
+disp(['TS MSE (best config after refit): ', num2str(ts_error)])
 
 disp('Best hyperparameters:')
 disp(['Seed: ', num2str(seed_best)])
