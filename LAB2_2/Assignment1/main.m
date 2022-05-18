@@ -1,22 +1,40 @@
 data = load("lab2_2_data.mat");
 
 input_patterns = [data.p0, data.p1, data.p2];
-memory_pattern = 0;
-distortion_prop = 0.05;
+distortion_prop = [0.05, 0.1, 0.25];
 
-num_config = 10;
+% Model selection
+tot_discrepancy = 0;
+num_config = 5;
 for config=1:num_config
     bias = (1+1) * rand - 1;
-    Model = Hopfield(input_patterns, memory_pattern+1, bias, distortion_prop);
+    for pattern=1:size(input_patterns,2)
+        for j=1:length(distortion_prop)
+            Model = Hopfield(input_patterns, pattern, bias, distortion_prop(j));
+            tot_discrepancy = tot_discrepancy + Model.discrepancy;
+        end
+    end
+    tot_discrepancy = tot_discrepancy / (size(input_patterns,2) * length(distortion_prop));
+
     % Best configuration
     if config == 1
-        minimum = Model.discrepancy;
+        minimum = tot_discrepancy;
         bias_best = bias;
-    elseif Model.discrepancy < minimum
-        minimum = Model.discrepancy;
+    elseif tot_discrepancy < minimum
+        minimum = tot_discrepancy;
         bias_best = bias;
     end
 end
 
-Model_best = Hopfield(input_patterns, memory_pattern+1, bias_best, distortion_prop);
-Model_best.plot(memory_pattern+1, distortion_prop)
+
+for pattern=1:size(input_patterns,2)
+    for j=1:length(distortion_prop)
+        Model_best = Hopfield(input_patterns, pattern, bias_best, distortion_prop(j));
+        Model_best.plot(pattern, distortion_prop(j))
+    end
+end
+
+%{
+Model_best = Hopfield(input_patterns, index_pattern+1, bias_best, distortion_prop);
+Model_best.plot(index_pattern+1, distortion_prop)
+%}
