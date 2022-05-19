@@ -1,8 +1,9 @@
-function W_out = trainReadout(x, d, Nw, lambda_r)
-% Discard the washout
-d = d(:, Nw+1:end);
-
+function W_out = trainReadout(x, d, lambda_r)
 [dim, len] = size(x);
+
+% Discard the washout from target
+d = d(:, end-len+1:end);
+
 X = [x; ones(1, len)];
 
 if lambda_r == 0

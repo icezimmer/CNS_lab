@@ -4,6 +4,7 @@ input_patterns = [data.p0, data.p1, data.p2];
 distortion_prop = [0.05, 0.1, 0.25];
 
 % Model selection
+disp('Model selection')
 tot_discrepancy = 0;
 num_config = 5;
 for config=1:num_config
@@ -26,7 +27,7 @@ for config=1:num_config
     end
 end
 
-
+disp('Computation')
 for pattern=1:size(input_patterns,2)
     for j=1:length(distortion_prop)
         Model_best = Hopfield(input_patterns, pattern, bias_best, distortion_prop(j));

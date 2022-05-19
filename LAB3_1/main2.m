@@ -19,9 +19,9 @@ vl_tg = target_data(vl_index);
 ts_tg = target_data(ts_index);
 
 % Model Selection (Training with Random search)
-num_config = 5;
+num_config = 20;
 for config = 1:num_config
-    [net, delayedInput, initialInput, ~, delayedTarget] = randomRNNgen(tr_in, tr_tg, [5, 15], [10, 20], [0.001, 0.001], [0.5, 0.5], [500,1500], [0.1, 0.1]);
+    [net, delayedInput, initialInput, ~, delayedTarget] = randomRNNgen(tr_in, tr_tg, [5, 15], [10, 20], 0.01, 0.1, [500,1500], [4, 7]);
     net = train(net, delayedInput, delayedTarget, initialInput);
     tr_out = net(tr_in);
     vl_out = net(vl_in);
@@ -32,42 +32,48 @@ for config = 1:num_config
         %net_best = net;
         tr_minimum = tr_error;
         vl_minimum = vl_error;
-        sd_best = net.numInputDelays;
-        hs_best = net.layers{1}.size;
+        numInputDelays_best = net.numInputDelays;
+        hiddenSize_best = net.layers{1}.size;
         lr_best = net.trainParam.lr;
         mc_best = net.trainParam.mc;
         epochs_best = net.trainParam.epochs;        
-        reg_best = net.performParam.regularization;
+        regularization_best = net.performParam.regularization;
     elseif vl_error < vl_minimum
         %net_best = net;
         tr_minimum = tr_error;
         vl_minimum = vl_error;
-        sd_best = net.numInputDelays;
-        hs_best = net.layers{1}.size;
+        numInputDelays_best = net.numInputDelays;
+        hiddenSize_best = net.layers{1}.size;
         lr_best = net.trainParam.lr;
         mc_best = net.trainParam.mc;
         epochs_best = net.trainParam.epochs;        
-        reg_best = net.performParam.regularization;
+        regularization_best = net.performParam.regularization;
     end
 end
 
-disp(['TR MSE (best config): ', num2str(tr_minimum)])
-disp(['VL MSE (best config): ', num2str(vl_minimum)])
+% Save the hyper-parameters
+save(fullfile('results', strcat('RNN', 'hyperparameters', '.mat')), 'numInputDelays_best', 'hiddenSize_best', 'lr_best', 'mc_best', 'epochs_best', 'regularization_best')
 
 % Refit
-net_best = layrecnet(1:sd_best);
+net_best = layrecnet(1:numInputDelays_best);
 [delayedInput, initialInput, initialStates, delayedTarget] = preparets(net_best, dv_in, dv_tg);
 net_best.divideFcn = 'dividetrain';
 net_best.trainParam.showWindow = 0;
-net_best.layers{1}.size = hs_best;
+net_best.layers{1}.size = hiddenSize_best;
 net_best.trainParam.lr = lr_best;
 net_best.trainParam.mc = mc_best;
 net_best.trainParam.epochs = epochs_best;        
-net_best.performParam.regularization = reg_best;
+net_best.performParam.regularization = regularization_best;
 
 % Test the net
 net_best = train(net_best, delayedInput, delayedTarget, initialInput);
 ts_out = net_best(ts_in);
 ts_error = immse(cell2mat(ts_out), cell2mat(ts_tg));
+
+disp(['TR MSE (best config): ', num2str(tr_minimum)])
+disp(['VL MSE (best config): ', num2str(vl_minimum)])
 disp(['TS MSE (best config after refit): ', num2str(ts_error)]);
+
+% Save the MSE for the TR, VL and TS sets
+save(fullfile('results', strcat('RNN', 'mse', '.mat')),'tr_minimum', 'vl_minimum', 'ts_error')
 

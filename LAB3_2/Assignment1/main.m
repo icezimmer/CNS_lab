@@ -17,38 +17,19 @@ tr_tg = cell2mat(target_data(tr_index));
 vl_tg = cell2mat(target_data(vl_index));
 ts_tg = cell2mat(target_data(ts_index));
 
-%{
-omega_in = 0.5;
-Nh = 200;
-rho = 0.8;
-Nw = 500;
+% Model Selection (Random search)
 seed = 1;
-
-lambda_r = 0.01;
-
-% Echo state
-x = esn(tr_in, omega_in, Nh, rho, Nw, seed);
-%y = readoutPinv(x, tr_tg, Nw);
-y = readoutRidgeReg(x, tr_tg, Nw, lambda_r);
-
-% MSE
-d = tr_tg(:, Nw+1:end);
-immse(y, d)
-%}
-
-seed = 1;
-% Model Selection (Training with Random search)
-num_config = 10;
+num_config = 20;
 for config = 1:num_config
 
-    [omega_in, Nh, rho, Nw, lambda_r] = randomGen([1], [100, 500], [0.9], [200, 700], [0], seed);
-    x_tr = esn(tr_in, omega_in, Nh, rho, Nw, seed);
-    W_out = trainReadout(x_tr, tr_tg, Nw, lambda_r);
-    y_tr = readout(x_tr, W_out);
-    d_tr = tr_tg(:, Nw+1:end);
-    tr_error = immse(y_tr, d_tr);
+    [omega_in, Nh, rho, Nw, lambda_r] = randomGen(1.2, [100, 500], 1, [200, 700], [4, 7], seed);
+    
+    [~, x_tr_ws, pooler_tr] = esn(tr_in, omega_in, Nh, rho, Nw, seed);
+    W_out = trainReadout(x_tr_ws, tr_tg, lambda_r);
+    y_tr = readout(x_tr_ws, W_out);
+    tr_error = immse(y_tr, tr_tg(:, Nw+1:end));
 
-    x_vl = esn(vl_in, omega_in, Nh, rho, 0, seed);
+    x_vl = esn(vl_in, omega_in, Nh, rho, 0, seed, pooler_tr);
     y_vl = readout(x_vl, W_out);
     vl_error = immse(y_vl, vl_tg);
 
@@ -77,25 +58,42 @@ for config = 1:num_config
 
 end
 
-disp(['TR MSE (best config): ', num2str(tr_minimum)])
-disp(['VL MSE (best config): ', num2str(vl_minimum)])
-
+% Save the hyper-parameters
+save(fullfile('results', strcat('hyperparameters', '.mat')), 'seed_best', 'omega_in_best', 'Nh_best', 'rho_best', 'Nw_best', 'Nw_best', 'lambda_r_best')
 
 % Refit
-x_dv = esn(dv_in, omega_in_best, Nh_best, rho_best, Nw_best, seed_best);
-W_out_new = trainReadout(x_dv, dv_tg, Nw_best, lambda_r_best);
+[~, x_dv_ws, pooler_dv, W_in, W_hat] = esn(dv_in, omega_in_best, Nh_best, rho_best, Nw_best, seed_best);
+W_out_new = trainReadout(x_dv_ws, dv_tg, lambda_r_best);
+
+% Save the weight matrices
+save(fullfile('results', strcat('esn_struct', '.mat')),'W_in', 'W_hat', 'W_out_new')
 
 % Test the net
-x_ts = esn(ts_in, omega_in_best, Nh_best, rho_best, 0, seed_best);
+x_ts = esn(ts_in, omega_in_best, Nh_best, rho_best, 0, seed_best, pooler_dv);
 y_ts = readout(x_ts, W_out_new);
 ts_error = immse(y_ts, ts_tg);
 
+% Save the MSE for the TR, VL and TS sets
+save(fullfile('results', strcat('mse', '.mat')),'tr_minimum', 'vl_minimum', 'ts_error')
+
+
+disp(['TR MSE (best config): ', num2str(tr_minimum)])
+disp(['VL MSE (best config): ', num2str(vl_minimum)])
 disp(['TS MSE (best config after refit): ', num2str(ts_error)])
 
-disp('Best hyperparameters:')
-disp(['Seed: ', num2str(seed_best)])
-disp(['Omega in: ', num2str(omega_in_best)])
-disp(['Number of hidden neurons: ', num2str(Nh_best)])
-disp(['Spatial radius: ', num2str(rho)])
-disp(['Transient: ', num2str(Nw_best)])
-disp(['Regularization: ', num2str(lambda_r_best)])
+%{
+gcf1 = figure('Name', 'Training');
+plot(tr_tg(:, Nw_best+1:end), '-k')
+hold on
+plot(y_tr, '-r')
+hold off
+legend(gcf1, 'target', 'predict')
+%}
+
+gcf2 = figure('Name', 'Test');
+plt1 = plot(ts_tg, '-k');
+hold on
+plt2 = plot(y_ts, '-r');
+hold off
+legend([plt1, plt2], 'target', 'predict')
+saveas(gcf2, fullfile('results', strcat('test', '.png')))

@@ -4,7 +4,6 @@ classdef Hopfield
         neurons
         measures
         energy
-        streaming
         discrepancy
     end
 
@@ -22,7 +21,6 @@ classdef Hopfield
             obj.neurons = distort_image(input_patterns(:, pattern), distortion_prop);
             obj.measures = zeros(M, 0);
             obj.energy = zeros(1, 0);
-            obj.streaming = reshape(obj.neurons,32,32);
             
             stability = false;
             shuffle = randperm(N);
@@ -32,23 +30,18 @@ classdef Hopfield
                 for i = 1 : N
                     j = shuffle(i);
                     neurons_new(j) = sign(W(j, :) * neurons_new + bias + eps);
-                    obj.neurons = [obj.neurons, neurons_new];
                     obj.measures = [obj.measures, (1 / N) * (input_patterns' * neurons_new)];
                     obj.energy = [obj.energy, (-1/2) * sum(W .* kron(neurons_new, neurons_new'), "all")];
-                    obj.streaming = cat(3, obj.streaming, reshape(neurons_new, 32, 32));
-                    if isequal(obj.neurons(:, end), obj.neurons(:, end-1))
-                        stability = true;
-                    end
+                end
+                obj.neurons = [obj.neurons, neurons_new];
+                if isequal(obj.neurons(:, end), obj.neurons(:, end-1))
+                    stability = true;
                 end
             end
 
             obj.discrepancy = nnz(obj.neurons(:, end) ~= input_patterns(:, pattern)) / numel(input_patterns(:, pattern));
         end
 
-        function video(obj)
-            implay(obj.streaming,100)
-        end
-        
         function plot(obj, pattern, distortion_prop)
             subt1 = num2str(pattern);
             subt2 = regexprep(num2str(distortion_prop), '[.]', '');

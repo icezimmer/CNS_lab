@@ -10,13 +10,14 @@ max_eigenvector = V(:,max_index);
 
 save(fullfile('results', 'weight_vector.mat'), 'W')
 
-gcf1 = figure('Name','Hopfield');
+gcf1 = figure('Name','Hebbian');
 hold on
-scatter(input_data(1,:), input_data(2,:), 'filled', 'k')
-plotv(W(:,end) / norm(W(:,end)), '-r')
-plotv(max_eigenvector  / norm(max_eigenvector), '-b')
+sct1 = scatter(input_data(1,:), input_data(2,:), 'filled', 'k');
+plt1 = plot([0, W(1,end) / norm(W(:,end))],[0, W(2,end) / norm(W(:,end))] , '-r');
+plt2 = plot([0 max_eigenvector(1)  / norm(max_eigenvector)], [0 max_eigenvector(2)  / norm(max_eigenvector)], '-b');
 hold off
-title('Hopfiled vs. eigenvector (max eigenvalue)')
+legend([sct1, plt1, plt2], 'Points', 'Last weight vector', 'Eigenvec. (max eigenval.)')
+title('Hebbian rule')
 saveas(gcf1, fullfile('results', strcat('scatter', '.png')))
 
 gcf2 = figure('Name','Weights');
