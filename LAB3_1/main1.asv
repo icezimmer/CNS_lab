@@ -21,7 +21,7 @@ ts_tg = target_data(ts_index);
 % Model Selection (Training with Random search)
 num_config = 20;
 for config = 1:num_config
-    [net, delayedInput, initialInput, ~, delayedTarget] = randomIDNNgen(tr_in, tr_tg, [5, 15], [100, 1000], 0.01, 0.1, [10,100], [4,7]);
+    [net, delayedInput, initialInput, ~, delayedTarget] = randomIDNNgen(tr_in, tr_tg, [5, 15], [10, 100], 0.01, 0.1, [500,1500], [4,7]);
     [net, tr] = train(net, delayedInput, delayedTarget, initialInput);
     tr_out = net(tr_in);
     vl_out = net(vl_in);
@@ -51,15 +51,6 @@ for config = 1:num_config
     end
 end
 
-% Learning curve
-gcf1 = figure('Name', 'Learning curve');
-plt = plot(tr_best.perf);
-title('Learning curve')
-xlabel('epochs')
-ylabel('MSE')
-legend(plt, 'Training')
-saveas(gcf1, fullfile('results', 'IDNNlearning_curve.png'))
-
 % Refit
 net_best = timedelaynet(1:numInputDelays_best);
 [delayedInput, initialInput, initialStates, delayedTarget] = preparets(net_best, dv_in, dv_tg);
@@ -70,7 +61,7 @@ net_best.trainParam.lr = lr_best;
 net_best.trainParam.mc = mc_best;
 net_best.trainParam.epochs = epochs_best;        
 net_best.performParam.regularization = regularization_best;
-net_best = train(net_best, delayedInput, delayedTarget, initialInput);
+[net_best, t] = train(net_best, delayedInput, delayedTarget, initialInput);
 
 % Save the hyper-parameters
 save(fullfile('results', strcat('IDNN', 'hyperparameters', '.mat')), 'numInputDelays_best', 'hiddenSize_best', 'lr_best', 'mc_best', 'epochs_best', 'regularization_best')
@@ -89,11 +80,4 @@ disp(['TS MSE (best config after refit): ', num2str(ts_error)]);
 % Save the MSE for the TR, VL and TS sets
 save(fullfile('results', strcat('IDNN', 'mse', '.mat')),'tr_minimum', 'vl_minimum', 'ts_error')
 
-% Plot target and output signal (Test)
-gcf3 = figure('Name', 'Test');
-plt1 = plot(cell2mat(ts_tg), '-k');
-hold on
-plt2 = plot(cell2mat(ts_out), '-r');
-hold off
-legend([plt1, plt2], 'target', 'predict')
-saveas(gcf3, fullfile('results', strcat('IDNNtest', '.png')))
+plot(tr_best.time, t_bes.perf)

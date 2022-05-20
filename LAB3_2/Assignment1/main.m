@@ -81,6 +81,7 @@ disp(['TR MSE (best config): ', num2str(tr_minimum)])
 disp(['VL MSE (best config): ', num2str(vl_minimum)])
 disp(['TS MSE (best config after refit): ', num2str(ts_error)])
 
+% Plot target and output signal (Training)
 %{
 gcf1 = figure('Name', 'Training');
 plot(tr_tg(:, Nw_best+1:end), '-k')
@@ -90,6 +91,7 @@ hold off
 legend(gcf1, 'target', 'predict')
 %}
 
+% Plot target and output signal (Test)
 gcf2 = figure('Name', 'Test');
 plt1 = plot(ts_tg, '-k');
 hold on
