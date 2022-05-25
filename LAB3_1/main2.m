@@ -7,7 +7,6 @@ tr_index = 1:4000;
 vl_index = 4001:5000;
 ts_index = 5001:length(input_data);
 
-%servono le cell e non array
 dv_in = input_data(dv_index);
 tr_in = input_data(tr_index);
 vl_in = input_data(vl_index);
@@ -19,30 +18,28 @@ vl_tg = target_data(vl_index);
 ts_tg = target_data(ts_index);
 
 % Model Selection (Training with Random search)
-num_config = 20;
+num_config = 10;
 for config = 1:num_config
     [net, delayedInput, initialInput, ~, delayedTarget] = randomRNNgen(tr_in, tr_tg, [1, 3], [10, 20], 0.01, 0.1, [100,1000], [4, 7]);
-    [net, tr] = train(net, delayedInput, delayedTarget, initialInput);
+    net = train(net, delayedInput, delayedTarget, initialInput);
     tr_out = net(tr_in);
     vl_out = net(vl_in);
     tr_error = immse(cell2mat(tr_out), cell2mat(tr_tg));
     vl_error = immse(cell2mat(vl_out), cell2mat(vl_tg));
     % Best configuration
     if config == 1
-        tr_best = tr;
         tr_minimum = tr_error;
         vl_minimum = vl_error;
-        numLayerDelays_best = net.numLayerDelays;
+        %numLayerDelays_best = net.numLayerDelays;
         hiddenSize_best = net.layers{1}.size;
         lr_best = net.trainParam.lr;
         mc_best = net.trainParam.mc;
         epochs_best = net.trainParam.epochs;        
         regularization_best = net.performParam.regularization;
     elseif vl_error < vl_minimum
-        tr_best = tr;
         tr_minimum = tr_error;
         vl_minimum = vl_error;
-        numLayerDelays_best = net.numLayerDelays;
+        %numLayerDelays_best = net.numLayerDelays;
         hiddenSize_best = net.layers{1}.size;
         lr_best = net.trainParam.lr;
         mc_best = net.trainParam.mc;
@@ -50,6 +47,38 @@ for config = 1:num_config
         regularization_best = net.performParam.regularization;
     end
 end
+
+% Save the hyper-parameters
+%save(fullfile('results', strcat('RNN', 'hyperparameters', '.mat')), 'numLayerDelays_best', 'hiddenSize_best', 'lr_best', 'mc_best', 'epochs_best', 'regularization_best')
+save(fullfile('results', strcat('RNN', 'hyperparameters', '.mat')), 'hiddenSize_best', 'lr_best', 'mc_best', 'epochs_best', 'regularization_best')
+
+% Refit
+%net_best = layrecnet(1:numLayerDelays_best);
+net_best = layrecnet(1);
+[delayedInput, initialInput, initialStates, delayedTarget] = preparets(net_best, dv_in, dv_tg);
+net_best.divideFcn = 'dividetrain';
+net_best.trainParam.showWindow = 0;
+net_best.layers{1}.size = hiddenSize_best;
+net_best.trainParam.lr = lr_best;
+net_best.trainParam.mc = mc_best;
+net_best.trainParam.epochs = epochs_best;        
+net_best.performParam.regularization = regularization_best;
+[net_best,tr_best] = train(net_best, delayedInput, delayedTarget, initialInput);
+
+% Save the TR record
+save(fullfile('results', strcat('RNN', 'record', '.mat')), 'tr_best')
+
+% Architecture
+view(net_best)
+
+% Plot target and output signal (Training)
+gcf1 = figure('Name', 'Training');
+plt1 = plot(cell2mat(dv_tg), '-k');
+hold on
+plt2 = plot(cell2mat(net_best(dv_in)), '-r');
+hold off
+legend([plt1, plt2], 'target', 'predict')
+saveas(gcf1, fullfile('results', strcat('RNNtraining', '.png')))
 
 % Learning curve
 gcf1 = figure('Name', 'Learning curve');
@@ -60,26 +89,7 @@ ylabel('MSE')
 legend(plt, 'Training')
 saveas(gcf1, fullfile('results', 'RNNlearning_curve.png'))
 
-% Save the hyper-parameters
-save(fullfile('results', strcat('RNN', 'hyperparameters', '.mat')), 'numLayerDelays_best', 'hiddenSize_best', 'lr_best', 'mc_best', 'epochs_best', 'regularization_best')
-%save(fullfile('results', strcat('RNN', 'hyperparameters', '.mat')), 'hiddenSize_best', 'lr_best', 'mc_best', 'epochs_best', 'regularization_best')
-
-% Refit
-net_best = layrecnet(1:numLayerDelays_best);
-[delayedInput, initialInput, initialStates, delayedTarget] = preparets(net_best, dv_in, dv_tg);
-net_best.divideFcn = 'dividetrain';
-net_best.trainParam.showWindow = 0;
-net_best.layers{1}.size = hiddenSize_best;
-net_best.trainParam.lr = lr_best;
-net_best.trainParam.mc = mc_best;
-net_best.trainParam.epochs = epochs_best;        
-net_best.performParam.regularization = regularization_best;
-
-% Architecture
-view(net_best)
-
 % Test the net
-net_best = train(net_best, delayedInput, delayedTarget, initialInput);
 ts_out = net_best(ts_in);
 ts_error = immse(cell2mat(ts_out), cell2mat(ts_tg));
 

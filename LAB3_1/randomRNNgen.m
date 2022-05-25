@@ -1,9 +1,7 @@
 function [net, delayedInput, initialInput, initialStates, delayedTarget] = randomRNNgen(data_in, data_tg, sd, hs, lr, mc, epochs, reg)
 % Ramdom generation of the net
 
-sizeDelays = randi([sd(1),sd(2)]); %size of input delay
-layerDelays = 1:sizeDelays;
-%layerDelays = 1;
+layerDelays = 1;
 
 % Create the net
 net = layrecnet(layerDelays);

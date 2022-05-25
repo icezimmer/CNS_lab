@@ -19,7 +19,7 @@ ts_tg = cell2mat(target_data(ts_index));
 
 % Model Selection (Random search)
 seed = 1;
-num_config = 20;
+num_config = 5;
 for config = 1:num_config
 
     [omega_in, Nh, rho, Nw, lambda_r] = randomGen(1.2, [100, 500], 1, [200, 700], [4, 7], seed);
@@ -64,9 +64,19 @@ save(fullfile('results', strcat('hyperparameters', '.mat')), 'seed_best', 'omega
 % Refit
 [~, x_dv_ws, pooler_dv, W_in, W_hat] = esn(dv_in, omega_in_best, Nh_best, rho_best, Nw_best, seed_best);
 W_out_new = trainReadout(x_dv_ws, dv_tg, lambda_r_best);
+y_dv = readout(x_dv_ws, W_out_new);
 
 % Save the weight matrices
 save(fullfile('results', strcat('esn_struct', '.mat')),'W_in', 'W_hat', 'W_out_new')
+
+% Plot target and output signal (Training)
+gcf1 = figure('Name', 'Training');
+plt1 = plot(dv_tg(:, Nw_best+1:end), '-k');
+hold on
+plt2 = plot(y_dv, '-r');
+hold off
+legend([plt1, plt2], 'target', 'predict')
+saveas(gcf1, fullfile('results', strcat('training', '.png')))
 
 % Test the net
 x_ts = esn(ts_in, omega_in_best, Nh_best, rho_best, 0, seed_best, pooler_dv);
@@ -80,16 +90,6 @@ save(fullfile('results', strcat('mse', '.mat')),'tr_minimum', 'vl_minimum', 'ts_
 disp(['TR MSE (best config): ', num2str(tr_minimum)])
 disp(['VL MSE (best config): ', num2str(vl_minimum)])
 disp(['TS MSE (best config after refit): ', num2str(ts_error)])
-
-% Plot target and output signal (Training)
-%{
-gcf1 = figure('Name', 'Training');
-plot(tr_tg(:, Nw_best+1:end), '-k')
-hold on
-plot(y_tr, '-r')
-hold off
-legend(gcf1, 'target', 'predict')
-%}
 
 % Plot target and output signal (Test)
 gcf2 = figure('Name', 'Test');

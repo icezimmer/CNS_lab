@@ -1,4 +1,4 @@
-function [net, delayedInput, initialInput, initialStates, delayedTarget] = randomIDNNgen(data_in, data_tg, sd, hs, lr, mc, epochs, reg)
+function [net, delayedInput, initialInput, initialStates, delayedTarget] = randomTDNNgen(data_in, data_tg, sd, hs, lr, mc, epochs, reg)
 % Random generation of the net
 
 sizeDelays = randi([sd(1),sd(2)]); %size of input delay

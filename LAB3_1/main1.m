@@ -7,7 +7,6 @@ tr_index = 1:4000;
 vl_index = 4001:5000;
 ts_index = 5001:length(input_data);
 
-%servono le cell e non array
 dv_in = input_data(dv_index);
 tr_in = input_data(tr_index);
 vl_in = input_data(vl_index);
@@ -19,17 +18,16 @@ vl_tg = target_data(vl_index);
 ts_tg = target_data(ts_index);
 
 % Model Selection (Training with Random search)
-num_config = 20;
+num_config = 10;
 for config = 1:num_config
-    [net, delayedInput, initialInput, ~, delayedTarget] = randomIDNNgen(tr_in, tr_tg, [5, 15], [100, 1000], 0.01, 0.1, [10,100], [4,7]);
-    [net, tr] = train(net, delayedInput, delayedTarget, initialInput);
+    [net, delayedInput, initialInput, ~, delayedTarget] = randomTDNNgen(tr_in, tr_tg, [5, 15], [100, 1000], 0.01, 0.1, [10,100], [4,7]);
+    net = train(net, delayedInput, delayedTarget, initialInput);
     tr_out = net(tr_in);
     vl_out = net(vl_in);
     tr_error = immse(cell2mat(tr_out), cell2mat(tr_tg));
     vl_error = immse(cell2mat(vl_out), cell2mat(vl_tg));
     % Best configuration
     if config == 1
-        tr_best = tr;
         tr_minimum = tr_error;
         vl_minimum = vl_error;
         numInputDelays_best = net.numInputDelays;
@@ -39,7 +37,6 @@ for config = 1:num_config
         epochs_best = net.trainParam.epochs;        
         regularization_best = net.performParam.regularization;
     elseif vl_error < vl_minimum
-        tr_best = tr;
         tr_minimum = tr_error;
         vl_minimum = vl_error;
         numInputDelays_best = net.numInputDelays;
@@ -51,14 +48,8 @@ for config = 1:num_config
     end
 end
 
-% Learning curve
-gcf1 = figure('Name', 'Learning curve');
-plt = plot(tr_best.perf);
-title('Learning curve')
-xlabel('epochs')
-ylabel('MSE')
-legend(plt, 'Training')
-saveas(gcf1, fullfile('results', 'IDNNlearning_curve.png'))
+% Save the hyper-parameters
+save(fullfile('results', strcat('TDNN', 'hyperparameters', '.mat')), 'numInputDelays_best', 'hiddenSize_best', 'lr_best', 'mc_best', 'epochs_best', 'regularization_best')
 
 % Refit
 net_best = timedelaynet(1:numInputDelays_best);
@@ -70,13 +61,31 @@ net_best.trainParam.lr = lr_best;
 net_best.trainParam.mc = mc_best;
 net_best.trainParam.epochs = epochs_best;        
 net_best.performParam.regularization = regularization_best;
-net_best = train(net_best, delayedInput, delayedTarget, initialInput);
+[net_best, tr_best] = train(net_best, delayedInput, delayedTarget, initialInput);
 
-% Save the hyper-parameters
-save(fullfile('results', strcat('IDNN', 'hyperparameters', '.mat')), 'numInputDelays_best', 'hiddenSize_best', 'lr_best', 'mc_best', 'epochs_best', 'regularization_best')
+% Save the TR record
+save(fullfile('results', strcat('TDNN', 'record', '.mat')), 'tr_best')
 
 % Architecture
 view(net_best)
+
+% Learning curve
+gcf2 = figure('Name', 'Learning curve');
+plt = plot(tr_best.perf);
+title('Learning curve')
+xlabel('epochs')
+ylabel('MSE')
+legend(plt, 'Training')
+saveas(gcf2, fullfile('results', 'TDNNlearning_curve.png'))
+
+% Plot target and output signal (Training)
+gcf1 = figure('Name', 'Training');
+plt1 = plot(cell2mat(dv_tg), '-k');
+hold on
+plt2 = plot(cell2mat(net_best(dv_in)), '-r');
+hold off
+legend([plt1, plt2], 'target', 'predict')
+saveas(gcf1, fullfile('results', strcat('TDNNtraining', '.png')))
 
 % Test the net
 ts_out = net_best(ts_in);
@@ -87,7 +96,7 @@ disp(['VL MSE (best config): ', num2str(vl_minimum)])
 disp(['TS MSE (best config after refit): ', num2str(ts_error)]);
 
 % Save the MSE for the TR, VL and TS sets
-save(fullfile('results', strcat('IDNN', 'mse', '.mat')),'tr_minimum', 'vl_minimum', 'ts_error')
+save(fullfile('results', strcat('TDNN', 'mse', '.mat')),'tr_minimum', 'vl_minimum', 'ts_error')
 
 % Plot target and output signal (Test)
 gcf3 = figure('Name', 'Test');
@@ -96,4 +105,4 @@ hold on
 plt2 = plot(cell2mat(ts_out), '-r');
 hold off
 legend([plt1, plt2], 'target', 'predict')
-saveas(gcf3, fullfile('results', strcat('IDNNtest', '.png')))
+saveas(gcf3, fullfile('results', strcat('TDNNtest', '.png')))
