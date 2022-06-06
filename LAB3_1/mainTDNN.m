@@ -18,6 +18,7 @@ vl_tg = target_data(vl_index);
 ts_tg = target_data(ts_index);
 
 % Model Selection (Training with Random search)
+disp('Random Search: 0%')
 num_config = 10;
 for config = 1:num_config
     [net, delayedInput, initialInput, ~, delayedTarget] = randomTDNNgen(tr_in, tr_tg, [5, 15], [100, 1000], 0.01, 0.1, [10,100], [4,7]);
@@ -46,12 +47,11 @@ for config = 1:num_config
         epochs_best = net.trainParam.epochs;        
         regularization_best = net.performParam.regularization;
     end
+    disp(['Random Search: ', num2str(100*(config/num_config)), '%'])
 end
 
-% Save the hyper-parameters
-save(fullfile('results', strcat('TDNN', 'hyperparameters', '.mat')), 'numInputDelays_best', 'hiddenSize_best', 'lr_best', 'mc_best', 'epochs_best', 'regularization_best')
-
 % Refit
+disp('Refit')
 net_best = timedelaynet(1:numInputDelays_best);
 [delayedInput, initialInput, initialStates, delayedTarget] = preparets(net_best, dv_in, dv_tg);
 net_best.divideFcn = 'dividetrain';
@@ -62,12 +62,6 @@ net_best.trainParam.mc = mc_best;
 net_best.trainParam.epochs = epochs_best;        
 net_best.performParam.regularization = regularization_best;
 [net_best, tr_best] = train(net_best, delayedInput, delayedTarget, initialInput);
-
-% Save the TR record
-save(fullfile('results', strcat('TDNN', 'record', '.mat')), 'tr_best')
-
-% Architecture
-view(net_best)
 
 % Learning curve
 gcf2 = figure('Name', 'Learning curve');
@@ -88,6 +82,7 @@ legend([plt1, plt2], 'target', 'predict')
 saveas(gcf1, fullfile('results', strcat('TDNNtraining', '.png')))
 
 % Test the net
+disp('Assessment')
 ts_out = net_best(ts_in);
 ts_error = immse(cell2mat(ts_out), cell2mat(ts_tg));
 
@@ -95,8 +90,13 @@ disp(['TR MSE (best config): ', num2str(tr_minimum)])
 disp(['VL MSE (best config): ', num2str(vl_minimum)])
 disp(['TS MSE (best config after refit): ', num2str(ts_error)]);
 
-% Save the MSE for the TR, VL and TS sets
-save(fullfile('results', strcat('TDNN', 'mse', '.mat')),'tr_minimum', 'vl_minimum', 'ts_error')
+% Save the data structures
+IDNN_net = net_best;
+IDNN_trainingRecord = tr_best;
+tr_MSE = tr_minimum;
+vl_MSE = vl_minimum;
+ts_MSE = ts_error;
+save(fullfile('results', strcat('TDNN', 'data_struct', '.mat')), 'IDNN_net', 'IDNN_trainingRecord', 'tr_MSE', 'vl_MSE', 'ts_MSE')
 
 % Plot target and output signal (Test)
 gcf3 = figure('Name', 'Test');

@@ -18,6 +18,7 @@ vl_tg = target_data(vl_index);
 ts_tg = target_data(ts_index);
 
 % Model Selection (Training with Random search)
+disp('Random Search: 0%')
 num_config = 10;
 for config = 1:num_config
     [net, delayedInput, initialInput, ~, delayedTarget] = randomRNNgen(tr_in, tr_tg, [1, 3], [10, 20], 0.01, 0.1, [100,1000], [4, 7]);
@@ -30,7 +31,6 @@ for config = 1:num_config
     if config == 1
         tr_minimum = tr_error;
         vl_minimum = vl_error;
-        %numLayerDelays_best = net.numLayerDelays;
         hiddenSize_best = net.layers{1}.size;
         lr_best = net.trainParam.lr;
         mc_best = net.trainParam.mc;
@@ -39,21 +39,17 @@ for config = 1:num_config
     elseif vl_error < vl_minimum
         tr_minimum = tr_error;
         vl_minimum = vl_error;
-        %numLayerDelays_best = net.numLayerDelays;
         hiddenSize_best = net.layers{1}.size;
         lr_best = net.trainParam.lr;
         mc_best = net.trainParam.mc;
         epochs_best = net.trainParam.epochs;        
         regularization_best = net.performParam.regularization;
     end
+    disp(['Random Search: ', num2str(100*(config/num_config)), '%'])
 end
 
-% Save the hyper-parameters
-%save(fullfile('results', strcat('RNN', 'hyperparameters', '.mat')), 'numLayerDelays_best', 'hiddenSize_best', 'lr_best', 'mc_best', 'epochs_best', 'regularization_best')
-save(fullfile('results', strcat('RNN', 'hyperparameters', '.mat')), 'hiddenSize_best', 'lr_best', 'mc_best', 'epochs_best', 'regularization_best')
-
 % Refit
-%net_best = layrecnet(1:numLayerDelays_best);
+disp('Refit')
 net_best = layrecnet(1);
 [delayedInput, initialInput, initialStates, delayedTarget] = preparets(net_best, dv_in, dv_tg);
 net_best.divideFcn = 'dividetrain';
@@ -64,12 +60,6 @@ net_best.trainParam.mc = mc_best;
 net_best.trainParam.epochs = epochs_best;        
 net_best.performParam.regularization = regularization_best;
 [net_best,tr_best] = train(net_best, delayedInput, delayedTarget, initialInput);
-
-% Save the TR record
-save(fullfile('results', strcat('RNN', 'record', '.mat')), 'tr_best')
-
-% Architecture
-view(net_best)
 
 % Plot target and output signal (Training)
 gcf1 = figure('Name', 'Training');
@@ -90,6 +80,7 @@ legend(plt, 'Training')
 saveas(gcf1, fullfile('results', 'RNNlearning_curve.png'))
 
 % Test the net
+disp('Assessment')
 ts_out = net_best(ts_in);
 ts_error = immse(cell2mat(ts_out), cell2mat(ts_tg));
 
@@ -97,9 +88,13 @@ disp(['TR MSE (best config): ', num2str(tr_minimum)])
 disp(['VL MSE (best config): ', num2str(vl_minimum)])
 disp(['TS MSE (best config after refit): ', num2str(ts_error)]);
 
-% Save the MSE for the TR, VL and TS sets
-save(fullfile('results', strcat('RNN', 'mse', '.mat')),'tr_minimum', 'vl_minimum', 'ts_error')
-
+% Save the data structures
+RNN_net = net_best;
+RNN_trainingRecord = tr_best;
+tr_MSE = tr_minimum;
+vl_MSE = vl_minimum;
+ts_MSE = ts_error;
+save(fullfile('results', strcat('RNN', 'data_struct', '.mat')), 'RNN_net', 'RNN_trainingRecord', 'tr_MSE', 'vl_MSE', 'ts_MSE')
 
 % Plot target and output signal (Test)
 gcf3 = figure('Name', 'Test');

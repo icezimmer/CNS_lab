@@ -59,7 +59,7 @@ for config = 1:num_config
 end
 
 % Save the hyper-parameters
-save(fullfile('results', strcat('hyperparameters', '.mat')), 'seed_best', 'omega_in_best', 'Nh_best', 'rho_best', 'Nw_best', 'Nw_best', 'lambda_r_best')
+save(fullfile('results', strcat('hyperparameters', '.mat')), 'seed_best', 'omega_in_best', 'Nh_best', 'rho_best', 'Nw_best', 'lambda_r_best')
 
 % Refit
 [~, x_dv_ws, pooler_dv, W_in, W_hat] = esn(dv_in, omega_in_best, Nh_best, rho_best, Nw_best, seed_best);
